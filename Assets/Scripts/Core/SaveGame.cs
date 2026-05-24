@@ -6,7 +6,11 @@ namespace TacticalRoguelike.Core
     [Serializable]
     public sealed class SaveGame
     {
+        public const int CurrentSaveVersion = 1;
+
+        public int saveVersion = CurrentSaveVersion;
         public int seed;
+        public int floorNumber;
         public int turnNumber;
         public int runStatus;
         public int width;
@@ -25,7 +29,9 @@ namespace TacticalRoguelike.Core
 
             var save = new SaveGame
             {
+                saveVersion = CurrentSaveVersion,
                 seed = state.Seed,
+                floorNumber = state.FloorNumber,
                 turnNumber = state.TurnNumber,
                 runStatus = (int)state.Status,
                 width = state.Grid.Width,
@@ -75,6 +81,7 @@ namespace TacticalRoguelike.Core
             return new RunState(
                 grid,
                 seed,
+                floorNumber,
                 stairsDown.ToGridPosition(),
                 player.Restore(),
                 restoredEnemies,
@@ -85,6 +92,16 @@ namespace TacticalRoguelike.Core
 
         private void Validate()
         {
+            if (saveVersion != CurrentSaveVersion)
+            {
+                throw new InvalidOperationException(
+                    $"Unsupported save version {saveVersion}. Expected version {CurrentSaveVersion}."
+                );
+            }
+            if (floorNumber < 1)
+            {
+                throw new InvalidOperationException("Save floor number must be greater than zero.");
+            }
             if (width <= 0)
             {
                 throw new InvalidOperationException("Save width must be greater than zero.");

@@ -10,15 +10,24 @@ namespace TacticalRoguelike.Core
         private const int DefaultEnemyHitPoints = 3;
         private const int DefaultEnemyAttackDamage = 2;
 
-        public RunState(DungeonLayout layout)
+        public RunState(DungeonLayout layout, int floorNumber = 1)
         {
             if (layout == null)
             {
                 throw new ArgumentNullException(nameof(layout));
             }
+            if (floorNumber < 1)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(floorNumber),
+                    floorNumber,
+                    "Floor number must be greater than zero."
+                );
+            }
 
             Grid = layout.Grid;
             Seed = layout.Seed;
+            FloorNumber = floorNumber;
             StairsDown = layout.StairsDown;
             Player = new EntityState(
                 "player",
@@ -64,6 +73,7 @@ namespace TacticalRoguelike.Core
         internal RunState(
             GameGrid grid,
             int seed,
+            int floorNumber,
             GridPosition stairsDown,
             EntityState player,
             IEnumerable<EntityState> enemies,
@@ -85,6 +95,14 @@ namespace TacticalRoguelike.Core
                     "Turn number cannot be negative."
                 );
             }
+            if (floorNumber < 1)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(floorNumber),
+                    floorNumber,
+                    "Floor number must be greater than zero."
+                );
+            }
             if (!Grid.IsWalkable(Player.Position))
             {
                 throw new ArgumentException(
@@ -101,6 +119,7 @@ namespace TacticalRoguelike.Core
             }
 
             Seed = seed;
+            FloorNumber = floorNumber;
             StairsDown = stairsDown;
             TurnNumber = turnNumber;
             Status = status;
@@ -145,6 +164,7 @@ namespace TacticalRoguelike.Core
 
         public GameGrid Grid { get; }
         public int Seed { get; }
+        public int FloorNumber { get; }
         public GridPosition StairsDown { get; }
         public int TurnNumber { get; private set; }
         public EntityState Player { get; }

@@ -21,6 +21,8 @@ namespace TacticalRoguelike.Tests.EditMode
             RunState restored = SaveGame.Capture(state).Restore();
 
             Assert.AreEqual(state.Seed, restored.Seed);
+            Assert.AreEqual(SaveGame.CurrentSaveVersion, SaveGame.Capture(state).saveVersion);
+            Assert.AreEqual(state.FloorNumber, restored.FloorNumber);
             Assert.AreEqual(state.TurnNumber, restored.TurnNumber);
             Assert.AreEqual(state.Status, restored.Status);
             Assert.AreEqual(state.StairsDown, restored.StairsDown);
@@ -30,6 +32,117 @@ namespace TacticalRoguelike.Tests.EditMode
             AssertEntityEqual(state.Enemies[0], restored.Enemies[0]);
             Assert.IsFalse(restored.Enemies[0].IsAlive);
             Assert.AreEqual(RunStatus.Won, restored.Status);
+        }
+
+        [Test]
+        public void Restore_CurrentSaveVersion_RestoresRun()
+        {
+            GameGrid grid = CreateGrid();
+            var state = CreateRunState(
+                grid,
+                new GridPosition(1, 1),
+                new GridPosition(4, 1),
+                new GridPosition(5, 3)
+            );
+            SaveGame save = SaveGame.Capture(state);
+
+            RunState restored = save.Restore();
+
+            Assert.AreEqual(SaveGame.CurrentSaveVersion, save.saveVersion);
+            Assert.AreEqual(state.Seed, restored.Seed);
+            Assert.AreEqual(state.FloorNumber, restored.FloorNumber);
+        }
+
+        [Test]
+        public void Restore_UnknownSaveVersion_ThrowsClearException()
+        {
+            GameGrid grid = CreateGrid();
+            var state = CreateRunState(
+                grid,
+                new GridPosition(1, 1),
+                new GridPosition(4, 1),
+                new GridPosition(5, 3)
+            );
+            SaveGame save = SaveGame.Capture(state);
+            save.saveVersion = SaveGame.CurrentSaveVersion + 1;
+
+            var exception = Assert.Throws<System.InvalidOperationException>(() => save.Restore());
+
+            StringAssert.Contains("Unsupported save version", exception.Message);
+            StringAssert.Contains(save.saveVersion.ToString(), exception.Message);
+        }
+
+        [Test]
+        public void Restore_ZeroSaveVersion_ThrowsClearException()
+        {
+            GameGrid grid = CreateGrid();
+            var state = CreateRunState(
+                grid,
+                new GridPosition(1, 1),
+                new GridPosition(4, 1),
+                new GridPosition(5, 3)
+            );
+            SaveGame save = SaveGame.Capture(state);
+            save.saveVersion = 0;
+
+            var exception = Assert.Throws<System.InvalidOperationException>(() => save.Restore());
+
+            StringAssert.Contains("Unsupported save version", exception.Message);
+            StringAssert.Contains("0", exception.Message);
+        }
+
+        [Test]
+        public void Restore_ZeroFloorNumber_ThrowsClearException()
+        {
+            GameGrid grid = CreateGrid();
+            var state = CreateRunState(
+                grid,
+                new GridPosition(1, 1),
+                new GridPosition(4, 1),
+                new GridPosition(5, 3)
+            );
+            SaveGame save = SaveGame.Capture(state);
+            save.floorNumber = 0;
+
+            var exception = Assert.Throws<System.InvalidOperationException>(() => save.Restore());
+
+            StringAssert.Contains("floor number", exception.Message);
+        }
+
+        [Test]
+        public void Restore_PreservesFloorNumber()
+        {
+            GameGrid grid = CreateGrid();
+            var layout = new DungeonLayout(
+                grid,
+                777,
+                new GridPosition(1, 1),
+                new[] { new GridPosition(4, 1) },
+                new GridPosition(5, 3)
+            );
+            var state = new RunState(layout, floorNumber: 3);
+
+            RunState restored = SaveGame.Capture(state).Restore();
+
+            Assert.AreEqual(3, restored.FloorNumber);
+            Assert.AreEqual(state.FloorNumber, SaveGame.Capture(restored).floorNumber);
+        }
+
+        [Test]
+        public void RunState_ZeroFloorNumber_Throws()
+        {
+            GameGrid grid = CreateGrid();
+            var layout = new DungeonLayout(
+                grid,
+                777,
+                new GridPosition(1, 1),
+                new[] { new GridPosition(4, 1) },
+                new GridPosition(5, 3)
+            );
+
+            Assert.Throws<System.ArgumentOutOfRangeException>(() =>
+                new RunState(layout, floorNumber: 0)
+            );
         }
 
         [Test]
