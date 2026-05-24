@@ -12,7 +12,8 @@ namespace TacticalRoguelike.Tests.EditMode
             height: 24,
             roomCount: 6,
             minRoomSize: 4,
-            maxRoomSize: 7);
+            maxRoomSize: 7
+        );
 
         [Test]
         public void Generate_SameSeedAndConfig_ProducesSameLayoutAndSpawns()
@@ -31,11 +32,15 @@ namespace TacticalRoguelike.Tests.EditMode
             var generator = new DungeonGenerator();
             DungeonLayout baseline = generator.Generate(1000, TestConfig);
 
-            bool foundDifference = Enumerable.Range(1001, 12)
+            bool foundDifference = Enumerable
+                .Range(1001, 12)
                 .Select(seed => generator.Generate(seed, TestConfig))
                 .Any(layout => !LayoutsEqual(baseline, layout));
 
-            Assert.IsTrue(foundDifference, "Expected at least one nearby seed to produce a different layout or spawn set.");
+            Assert.IsTrue(
+                foundDifference,
+                "Expected at least one nearby seed to produce a different layout or spawn set."
+            );
         }
 
         [Test]
@@ -62,10 +67,19 @@ namespace TacticalRoguelike.Tests.EditMode
             {
                 DungeonLayout layout = generator.Generate(seed, TestConfig);
 
-                HashSet<GridPosition> reachable = FloodFillWalkable(layout.Grid, layout.PlayerSpawn);
-                int walkableCount = layout.Grid.Positions().Count(position => layout.Grid.IsWalkable(position));
+                HashSet<GridPosition> reachable = FloodFillWalkable(
+                    layout.Grid,
+                    layout.PlayerSpawn
+                );
+                int walkableCount = layout
+                    .Grid.Positions()
+                    .Count(position => layout.Grid.IsWalkable(position));
 
-                Assert.AreEqual(walkableCount, reachable.Count, $"Seed {seed} produced disconnected walkable tiles.");
+                Assert.AreEqual(
+                    walkableCount,
+                    reachable.Count,
+                    $"Seed {seed} produced disconnected walkable tiles."
+                );
             }
         }
 
@@ -79,7 +93,8 @@ namespace TacticalRoguelike.Tests.EditMode
                 roomCount: 4,
                 minRoomSize: 4,
                 maxRoomSize: 4,
-                roomPlacementAttempts: 4);
+                roomPlacementAttempts: 4
+            );
 
             DungeonLayout layout = generator.Generate(123, tightConfig);
 
@@ -119,12 +134,14 @@ namespace TacticalRoguelike.Tests.EditMode
 
         private static bool LayoutsEqual(DungeonLayout first, DungeonLayout second)
         {
-            if (first.Seed != second.Seed
+            if (
+                first.Seed != second.Seed
                 || first.Grid.Width != second.Grid.Width
                 || first.Grid.Height != second.Grid.Height
                 || first.PlayerSpawn != second.PlayerSpawn
                 || first.StairsDown != second.StairsDown
-                || !first.EnemySpawns.SequenceEqual(second.EnemySpawns))
+                || !first.EnemySpawns.SequenceEqual(second.EnemySpawns)
+            )
             {
                 return false;
             }

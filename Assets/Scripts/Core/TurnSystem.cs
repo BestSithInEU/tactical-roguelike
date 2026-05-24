@@ -19,7 +19,10 @@ namespace TacticalRoguelike.Core
                 return false;
             }
 
-            var target = new GridPosition(state.Player.Position.X + dx, state.Player.Position.Y + dy);
+            var target = new GridPosition(
+                state.Player.Position.X + dx,
+                state.Player.Position.Y + dy
+            );
             EntityState enemy = state.GetAliveEnemyAt(target);
             if (enemy != null)
             {

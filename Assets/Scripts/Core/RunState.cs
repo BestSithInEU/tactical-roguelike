@@ -20,7 +20,12 @@ namespace TacticalRoguelike.Core
             Grid = layout.Grid;
             Seed = layout.Seed;
             StairsDown = layout.StairsDown;
-            Player = new EntityState("player", layout.PlayerSpawn, DefaultPlayerHitPoints, DefaultPlayerAttackDamage);
+            Player = new EntityState(
+                "player",
+                layout.PlayerSpawn,
+                DefaultPlayerHitPoints,
+                DefaultPlayerAttackDamage
+            );
 
             var enemies = new List<EntityState>();
             for (int i = 0; i < layout.EnemySpawns.Count; i++)
@@ -28,22 +33,43 @@ namespace TacticalRoguelike.Core
                 GridPosition spawn = layout.EnemySpawns[i];
                 if (spawn == Player.Position)
                 {
-                    throw new ArgumentException("Enemy spawn cannot overlap the player spawn.", nameof(layout));
+                    throw new ArgumentException(
+                        "Enemy spawn cannot overlap the player spawn.",
+                        nameof(layout)
+                    );
                 }
 
                 if (FindAliveEntityAt(enemies, spawn) != null)
                 {
-                    throw new ArgumentException("Enemy spawns cannot overlap each other.", nameof(layout));
+                    throw new ArgumentException(
+                        "Enemy spawns cannot overlap each other.",
+                        nameof(layout)
+                    );
                 }
 
-                enemies.Add(new EntityState($"enemy-{i}", spawn, DefaultEnemyHitPoints, DefaultEnemyAttackDamage));
+                enemies.Add(
+                    new EntityState(
+                        $"enemy-{i}",
+                        spawn,
+                        DefaultEnemyHitPoints,
+                        DefaultEnemyAttackDamage
+                    )
+                );
             }
 
             Enemies = enemies;
             Status = RunStatus.Ongoing;
         }
 
-        internal RunState(GameGrid grid, int seed, GridPosition stairsDown, EntityState player, IEnumerable<EntityState> enemies, int turnNumber, RunStatus status)
+        internal RunState(
+            GameGrid grid,
+            int seed,
+            GridPosition stairsDown,
+            EntityState player,
+            IEnumerable<EntityState> enemies,
+            int turnNumber,
+            RunStatus status
+        )
         {
             Grid = grid ?? throw new ArgumentNullException(nameof(grid));
             Player = player ?? throw new ArgumentNullException(nameof(player));
@@ -53,15 +79,25 @@ namespace TacticalRoguelike.Core
             }
             if (turnNumber < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(turnNumber), turnNumber, "Turn number cannot be negative.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(turnNumber),
+                    turnNumber,
+                    "Turn number cannot be negative."
+                );
             }
             if (!Grid.IsWalkable(Player.Position))
             {
-                throw new ArgumentException("Player position must be on a walkable tile.", nameof(player));
+                throw new ArgumentException(
+                    "Player position must be on a walkable tile.",
+                    nameof(player)
+                );
             }
             if (!Grid.IsWalkable(stairsDown))
             {
-                throw new ArgumentException("Stairs down must be on a walkable tile.", nameof(stairsDown));
+                throw new ArgumentException(
+                    "Stairs down must be on a walkable tile.",
+                    nameof(stairsDown)
+                );
             }
 
             Seed = seed;
@@ -74,19 +110,31 @@ namespace TacticalRoguelike.Core
             {
                 if (enemy == null)
                 {
-                    throw new ArgumentException("Enemy list cannot contain null entries.", nameof(enemies));
+                    throw new ArgumentException(
+                        "Enemy list cannot contain null entries.",
+                        nameof(enemies)
+                    );
                 }
                 if (!Grid.IsWalkable(enemy.Position))
                 {
-                    throw new ArgumentException("Enemy positions must be on walkable tiles.", nameof(enemies));
+                    throw new ArgumentException(
+                        "Enemy positions must be on walkable tiles.",
+                        nameof(enemies)
+                    );
                 }
                 if (enemy.IsAlive && Player.IsAlive && enemy.Position == Player.Position)
                 {
-                    throw new ArgumentException("Alive enemy cannot overlap alive player.", nameof(enemies));
+                    throw new ArgumentException(
+                        "Alive enemy cannot overlap alive player.",
+                        nameof(enemies)
+                    );
                 }
                 if (enemy.IsAlive && FindAliveEntityAt(copiedEnemies, enemy.Position) != null)
                 {
-                    throw new ArgumentException("Alive enemies cannot overlap each other.", nameof(enemies));
+                    throw new ArgumentException(
+                        "Alive enemies cannot overlap each other.",
+                        nameof(enemies)
+                    );
                 }
 
                 copiedEnemies.Add(enemy);
@@ -112,7 +160,8 @@ namespace TacticalRoguelike.Core
 
         public bool IsOccupiedByAliveEntity(GridPosition position)
         {
-            return Player.IsAlive && Player.Position == position || GetAliveEnemyAt(position) != null;
+            return Player.IsAlive && Player.Position == position
+                || GetAliveEnemyAt(position) != null;
         }
 
         public bool IsWalkableAndEmpty(GridPosition position)
@@ -152,7 +201,10 @@ namespace TacticalRoguelike.Core
             return true;
         }
 
-        private static EntityState FindAliveEntityAt(IEnumerable<EntityState> entities, GridPosition position)
+        private static EntityState FindAliveEntityAt(
+            IEnumerable<EntityState> entities,
+            GridPosition position
+        )
         {
             foreach (EntityState entity in entities)
             {

@@ -11,12 +11,20 @@ namespace TacticalRoguelike.Core
         {
             if (width <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(width), width, "Width must be greater than zero.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(width),
+                    width,
+                    "Width must be greater than zero."
+                );
             }
 
             if (height <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(height), height, "Height must be greater than zero.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(height),
+                    height,
+                    "Height must be greater than zero."
+                );
             }
 
             Width = width;
@@ -73,7 +81,11 @@ namespace TacticalRoguelike.Core
         {
             if (!IsInBounds(position))
             {
-                throw new ArgumentOutOfRangeException(nameof(position), position, "Position is outside the grid bounds.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(position),
+                    position,
+                    "Position is outside the grid bounds."
+                );
             }
 
             return position.Y * Width + position.X;

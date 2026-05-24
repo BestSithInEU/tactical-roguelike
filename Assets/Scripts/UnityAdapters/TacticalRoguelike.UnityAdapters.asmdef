@@ -1,17 +1,14 @@
 {
-  "name": "TacticalRoguelike.UnityAdapters",
-  "rootNamespace": "TacticalRoguelike.UnityAdapters",
-  "references": [
-    "TacticalRoguelike.Core",
-    "Unity.InputSystem"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+	"name": "TacticalRoguelike.UnityAdapters",
+	"rootNamespace": "TacticalRoguelike.UnityAdapters",
+	"references": ["TacticalRoguelike.Core", "Unity.InputSystem"],
+	"includePlatforms": [],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": true,
+	"defineConstraints": [],
+	"versionDefines": [],
+	"noEngineReferences": false
 }

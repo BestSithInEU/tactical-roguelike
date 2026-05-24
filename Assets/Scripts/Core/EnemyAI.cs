@@ -13,30 +13,32 @@ namespace TacticalRoguelike.Core
         private readonly int searchTurns;
 
         public EnemyAI()
-            : this(new Pathfinding(), DefaultSightRange, DefaultSearchTurns)
-        {
-        }
+            : this(new Pathfinding(), DefaultSightRange, DefaultSearchTurns) { }
 
         public EnemyAI(Pathfinding pathfinding)
-            : this(pathfinding, DefaultSightRange, DefaultSearchTurns)
-        {
-        }
+            : this(pathfinding, DefaultSightRange, DefaultSearchTurns) { }
 
         public EnemyAI(Pathfinding pathfinding, int sightRange)
-            : this(pathfinding, sightRange, DefaultSearchTurns)
-        {
-        }
+            : this(pathfinding, sightRange, DefaultSearchTurns) { }
 
         public EnemyAI(Pathfinding pathfinding, int sightRange, int searchTurns)
         {
             this.pathfinding = pathfinding ?? throw new ArgumentNullException(nameof(pathfinding));
             if (sightRange < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(sightRange), sightRange, "Sight range cannot be negative.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(sightRange),
+                    sightRange,
+                    "Sight range cannot be negative."
+                );
             }
             if (searchTurns < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(searchTurns), searchTurns, "Search turns cannot be negative.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(searchTurns),
+                    searchTurns,
+                    "Search turns cannot be negative."
+                );
             }
 
             this.sightRange = sightRange;
@@ -67,7 +69,14 @@ namespace TacticalRoguelike.Core
                 return;
             }
 
-            if (FieldOfView.HasLineOfSight(state.Grid, enemy.Position, state.Player.Position, sightRange))
+            if (
+                FieldOfView.HasLineOfSight(
+                    state.Grid,
+                    enemy.Position,
+                    state.Player.Position,
+                    sightRange
+                )
+            )
             {
                 enemy.ObservePlayer(state.Player.Position, searchTurns);
                 MoveTowardVisiblePlayer(state, enemy);
@@ -100,7 +109,13 @@ namespace TacticalRoguelike.Core
 
         private bool MoveTowardVisiblePlayer(RunState state, EntityState enemy)
         {
-            IReadOnlyList<GridPosition> path = FindBestMovingPath(state, enemy, state.Player.Position, true, false);
+            IReadOnlyList<GridPosition> path = FindBestMovingPath(
+                state,
+                enemy,
+                state.Player.Position,
+                true,
+                false
+            );
             if (path.Count == 0)
             {
                 path = FindBestMovingPath(state, enemy, state.Player.Position, false, true);
@@ -109,9 +124,19 @@ namespace TacticalRoguelike.Core
             return MoveOneStepAlongPath(state, enemy, path);
         }
 
-        private bool MoveTowardLastKnownPosition(RunState state, EntityState enemy, GridPosition destination)
+        private bool MoveTowardLastKnownPosition(
+            RunState state,
+            EntityState enemy,
+            GridPosition destination
+        )
         {
-            IReadOnlyList<GridPosition> path = FindBestMovingPath(state, enemy, destination, false, true);
+            IReadOnlyList<GridPosition> path = FindBestMovingPath(
+                state,
+                enemy,
+                destination,
+                false,
+                true
+            );
             return MoveOneStepAlongPath(state, enemy, path);
         }
 
@@ -132,7 +157,13 @@ namespace TacticalRoguelike.Core
 
         private bool MoveTowardHome(RunState state, EntityState enemy)
         {
-            IReadOnlyList<GridPosition> path = FindBestMovingPath(state, enemy, enemy.HomePosition, false, true);
+            IReadOnlyList<GridPosition> path = FindBestMovingPath(
+                state,
+                enemy,
+                enemy.HomePosition,
+                false,
+                true
+            );
             return MoveOneStepAlongPath(state, enemy, path);
         }
 
@@ -169,7 +200,11 @@ namespace TacticalRoguelike.Core
             }
         }
 
-        private IReadOnlyList<GridPosition> FindExactMovingPath(RunState state, EntityState enemy, GridPosition destination)
+        private IReadOnlyList<GridPosition> FindExactMovingPath(
+            RunState state,
+            EntityState enemy,
+            GridPosition destination
+        )
         {
             if (destination == enemy.Position)
             {
@@ -182,7 +217,11 @@ namespace TacticalRoguelike.Core
                 return Array.Empty<GridPosition>();
             }
 
-            IReadOnlyList<GridPosition> path = pathfinding.FindPath(pathGrid, enemy.Position, destination);
+            IReadOnlyList<GridPosition> path = pathfinding.FindPath(
+                pathGrid,
+                enemy.Position,
+                destination
+            );
             return path.Count >= 2 ? path : Array.Empty<GridPosition>();
         }
 
@@ -191,7 +230,8 @@ namespace TacticalRoguelike.Core
             EntityState enemy,
             GridPosition destination,
             bool requireAdjacentToDestination,
-            bool requireDistanceImprovement)
+            bool requireDistanceImprovement
+        )
         {
             GameGrid pathGrid = CreatePathGrid(state, enemy);
             IReadOnlyList<GridPosition> bestPath = Array.Empty<GridPosition>();
@@ -212,25 +252,43 @@ namespace TacticalRoguelike.Core
                     continue;
                 }
 
-                if (requireDistanceImprovement && distanceToDestination >= currentDistanceToDestination)
+                if (
+                    requireDistanceImprovement
+                    && distanceToDestination >= currentDistanceToDestination
+                )
                 {
                     continue;
                 }
 
-                if (!requireAdjacentToDestination && distanceToDestination > bestDistanceToDestination)
+                if (
+                    !requireAdjacentToDestination
+                    && distanceToDestination > bestDistanceToDestination
+                )
                 {
                     continue;
                 }
 
-                IReadOnlyList<GridPosition> path = pathfinding.FindPath(pathGrid, enemy.Position, candidate);
+                IReadOnlyList<GridPosition> path = pathfinding.FindPath(
+                    pathGrid,
+                    enemy.Position,
+                    candidate
+                );
                 if (path.Count < 2)
                 {
                     continue;
                 }
 
                 bool isBetter = requireAdjacentToDestination
-                    ? path.Count < bestPathLength || (path.Count == bestPathLength && distanceToDestination < bestDistanceToDestination)
-                    : distanceToDestination < bestDistanceToDestination || (distanceToDestination == bestDistanceToDestination && path.Count < bestPathLength);
+                    ? path.Count < bestPathLength
+                        || (
+                            path.Count == bestPathLength
+                            && distanceToDestination < bestDistanceToDestination
+                        )
+                    : distanceToDestination < bestDistanceToDestination
+                        || (
+                            distanceToDestination == bestDistanceToDestination
+                            && path.Count < bestPathLength
+                        );
 
                 if (isBetter)
                 {
@@ -243,7 +301,11 @@ namespace TacticalRoguelike.Core
             return bestPath;
         }
 
-        private static bool MoveOneStepAlongPath(RunState state, EntityState enemy, IReadOnlyList<GridPosition> path)
+        private static bool MoveOneStepAlongPath(
+            RunState state,
+            EntityState enemy,
+            IReadOnlyList<GridPosition> path
+        )
         {
             if (path.Count < 2)
             {
@@ -277,7 +339,12 @@ namespace TacticalRoguelike.Core
             return points;
         }
 
-        private static void AddPatrolPointIfAvailable(RunState state, EntityState enemy, List<GridPosition> points, GridPosition position)
+        private static void AddPatrolPointIfAvailable(
+            RunState state,
+            EntityState enemy,
+            List<GridPosition> points,
+            GridPosition position
+        )
         {
             if (!state.Grid.IsWalkable(position))
             {
@@ -285,7 +352,10 @@ namespace TacticalRoguelike.Core
             }
 
             EntityState occupyingEnemy = state.GetAliveEnemyAt(position);
-            if ((state.Player.IsAlive && state.Player.Position == position) || (occupyingEnemy != null && occupyingEnemy != enemy))
+            if (
+                (state.Player.IsAlive && state.Player.Position == position)
+                || (occupyingEnemy != null && occupyingEnemy != enemy)
+            )
             {
                 return;
             }

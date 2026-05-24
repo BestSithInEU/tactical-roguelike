@@ -136,7 +136,11 @@ namespace TacticalRoguelike.Tests.EditMode
         [Test]
         public void TryMovePlayer_OntoStairsAfterDefeatingEnemies_SetsWonStatus()
         {
-            RunState state = CreateRunState(new GridPosition(1, 1), new GridPosition(2, 1), new GridPosition(2, 1));
+            RunState state = CreateRunState(
+                new GridPosition(1, 1),
+                new GridPosition(2, 1),
+                new GridPosition(2, 1)
+            );
 
             bool acted = TurnSystem.TryMovePlayer(state, 1, 0);
 
@@ -157,19 +161,38 @@ namespace TacticalRoguelike.Tests.EditMode
             return CreateRunState(playerSpawn, enemySpawn, new GridPosition(5, 5));
         }
 
-        private static RunState CreateRunState(GridPosition playerSpawn, GridPosition enemySpawn, GridPosition stairsDown)
+        private static RunState CreateRunState(
+            GridPosition playerSpawn,
+            GridPosition enemySpawn,
+            GridPosition stairsDown
+        )
         {
             return CreateRunState(CreateFloorGrid(), playerSpawn, enemySpawn, stairsDown);
         }
 
-        private static RunState CreateRunState(GameGrid grid, GridPosition playerSpawn, GridPosition enemySpawn)
+        private static RunState CreateRunState(
+            GameGrid grid,
+            GridPosition playerSpawn,
+            GridPosition enemySpawn
+        )
         {
             return CreateRunState(grid, playerSpawn, enemySpawn, new GridPosition(5, 5));
         }
 
-        private static RunState CreateRunState(GameGrid grid, GridPosition playerSpawn, GridPosition enemySpawn, GridPosition stairsDown)
+        private static RunState CreateRunState(
+            GameGrid grid,
+            GridPosition playerSpawn,
+            GridPosition enemySpawn,
+            GridPosition stairsDown
+        )
         {
-            var layout = new DungeonLayout(grid, 1234, playerSpawn, new[] { enemySpawn }, stairsDown);
+            var layout = new DungeonLayout(
+                grid,
+                1234,
+                playerSpawn,
+                new[] { enemySpawn },
+                stairsDown
+            );
             return new RunState(layout);
         }
 

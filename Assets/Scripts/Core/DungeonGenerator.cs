@@ -5,41 +5,76 @@ namespace TacticalRoguelike.Core
 {
     public readonly struct DungeonGeneratorConfig
     {
-        public DungeonGeneratorConfig(int width, int height, int roomCount, int minRoomSize, int maxRoomSize, int roomPlacementAttempts = 200)
+        public DungeonGeneratorConfig(
+            int width,
+            int height,
+            int roomCount,
+            int minRoomSize,
+            int maxRoomSize,
+            int roomPlacementAttempts = 200
+        )
         {
             if (width < 10)
             {
-                throw new ArgumentOutOfRangeException(nameof(width), width, "Width must be at least 10.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(width),
+                    width,
+                    "Width must be at least 10."
+                );
             }
 
             if (height < 10)
             {
-                throw new ArgumentOutOfRangeException(nameof(height), height, "Height must be at least 10.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(height),
+                    height,
+                    "Height must be at least 10."
+                );
             }
 
             if (roomCount < 2)
             {
-                throw new ArgumentOutOfRangeException(nameof(roomCount), roomCount, "At least two rooms are required.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(roomCount),
+                    roomCount,
+                    "At least two rooms are required."
+                );
             }
 
             if (minRoomSize < 3)
             {
-                throw new ArgumentOutOfRangeException(nameof(minRoomSize), minRoomSize, "Minimum room size must be at least 3.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(minRoomSize),
+                    minRoomSize,
+                    "Minimum room size must be at least 3."
+                );
             }
 
             if (maxRoomSize < minRoomSize)
             {
-                throw new ArgumentOutOfRangeException(nameof(maxRoomSize), maxRoomSize, "Maximum room size must be greater than or equal to minimum room size.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(maxRoomSize),
+                    maxRoomSize,
+                    "Maximum room size must be greater than or equal to minimum room size."
+                );
             }
 
             if (maxRoomSize > width - 2 || maxRoomSize > height - 2)
             {
-                throw new ArgumentOutOfRangeException(nameof(maxRoomSize), maxRoomSize, "Maximum room size must fit inside the dungeon border.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(maxRoomSize),
+                    maxRoomSize,
+                    "Maximum room size must fit inside the dungeon border."
+                );
             }
 
             if (roomPlacementAttempts < roomCount)
             {
-                throw new ArgumentOutOfRangeException(nameof(roomPlacementAttempts), roomPlacementAttempts, "Room placement attempts must be at least the room count.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(roomPlacementAttempts),
+                    roomPlacementAttempts,
+                    "Room placement attempts must be at least the room count."
+                );
             }
 
             Width = width;
@@ -99,7 +134,11 @@ namespace TacticalRoguelike.Core
         {
             var rooms = new List<Room>(config.RoomCount);
 
-            for (int attempt = 0; attempt < config.RoomPlacementAttempts && rooms.Count < config.RoomCount; attempt++)
+            for (
+                int attempt = 0;
+                attempt < config.RoomPlacementAttempts && rooms.Count < config.RoomCount;
+                attempt++
+            )
             {
                 int width = random.Next(config.MinRoomSize, config.MaxRoomSize + 1);
                 int height = random.Next(config.MinRoomSize, config.MaxRoomSize + 1);
@@ -140,7 +179,8 @@ namespace TacticalRoguelike.Core
                 config.Width - config.MinRoomSize - 1,
                 config.Height - config.MinRoomSize - 1,
                 config.MinRoomSize,
-                config.MinRoomSize);
+                config.MinRoomSize
+            );
 
             if (rooms.Count == 0)
             {
@@ -150,7 +190,9 @@ namespace TacticalRoguelike.Core
             }
 
             Room existingRoom = rooms[0];
-            rooms.Add(existingRoom.Center == secondFallback.Center ? firstFallback : secondFallback);
+            rooms.Add(
+                existingRoom.Center == secondFallback.Center ? firstFallback : secondFallback
+            );
         }
 
         private static void CarveRoom(GameGrid grid, Room room)
@@ -164,7 +206,12 @@ namespace TacticalRoguelike.Core
             }
         }
 
-        private static void CarveCorridor(GameGrid grid, GridPosition start, GridPosition end, bool horizontalFirst)
+        private static void CarveCorridor(
+            GameGrid grid,
+            GridPosition start,
+            GridPosition end,
+            bool horizontalFirst
+        )
         {
             if (horizontalFirst)
             {
@@ -230,7 +277,10 @@ namespace TacticalRoguelike.Core
                 return new GridPosition(x, y);
             }
 
-            public GridPosition RandomInteriorPositionExcept(Random random, GridPosition excludedPosition)
+            public GridPosition RandomInteriorPositionExcept(
+                Random random,
+                GridPosition excludedPosition
+            )
             {
                 for (int attempt = 0; attempt < Width * Height; attempt++)
                 {
@@ -253,7 +303,9 @@ namespace TacticalRoguelike.Core
                     }
                 }
 
-                throw new InvalidOperationException("Room has no valid interior position outside the excluded tile.");
+                throw new InvalidOperationException(
+                    "Room has no valid interior position outside the excluded tile."
+                );
             }
         }
     }

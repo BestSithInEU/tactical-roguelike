@@ -13,12 +13,20 @@ namespace TacticalRoguelike.Core
 
             if (maxHitPoints <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(maxHitPoints), maxHitPoints, "Max hit points must be greater than zero.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(maxHitPoints),
+                    maxHitPoints,
+                    "Max hit points must be greater than zero."
+                );
             }
 
             if (attackDamage < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(attackDamage), attackDamage, "Attack damage cannot be negative.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(attackDamage),
+                    attackDamage,
+                    "Attack damage cannot be negative."
+                );
             }
 
             Id = id;
@@ -37,10 +45,21 @@ namespace TacticalRoguelike.Core
             int attackDamage,
             bool isAlerted,
             GridPosition? lastKnownPlayerPosition,
-            int searchTurnsRemaining)
-            : this(id, position, maxHitPoints, hitPoints, attackDamage, isAlerted, lastKnownPlayerPosition, searchTurnsRemaining, position, false, 0)
-        {
-        }
+            int searchTurnsRemaining
+        )
+            : this(
+                id,
+                position,
+                maxHitPoints,
+                hitPoints,
+                attackDamage,
+                isAlerted,
+                lastKnownPlayerPosition,
+                searchTurnsRemaining,
+                position,
+                false,
+                0
+            ) { }
 
         internal EntityState(
             string id,
@@ -53,16 +72,25 @@ namespace TacticalRoguelike.Core
             int searchTurnsRemaining,
             GridPosition homePosition,
             bool isReturningHome,
-            int patrolStepIndex)
+            int patrolStepIndex
+        )
             : this(id, position, maxHitPoints, attackDamage)
         {
             if (hitPoints < 0 || hitPoints > maxHitPoints)
             {
-                throw new ArgumentOutOfRangeException(nameof(hitPoints), hitPoints, "Hit points must be between zero and max hit points.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(hitPoints),
+                    hitPoints,
+                    "Hit points must be between zero and max hit points."
+                );
             }
             if (searchTurnsRemaining < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(searchTurnsRemaining), searchTurnsRemaining, "Search turns cannot be negative.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(searchTurnsRemaining),
+                    searchTurnsRemaining,
+                    "Search turns cannot be negative."
+                );
             }
 
             HitPoints = hitPoints;
@@ -91,7 +119,11 @@ namespace TacticalRoguelike.Core
         {
             if (searchTurns < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(searchTurns), searchTurns, "Search turns cannot be negative.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(searchTurns),
+                    searchTurns,
+                    "Search turns cannot be negative."
+                );
             }
 
             IsAlerted = true;
@@ -149,7 +181,11 @@ namespace TacticalRoguelike.Core
         {
             if (damage < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(damage), damage, "Damage cannot be negative.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(damage),
+                    damage,
+                    "Damage cannot be negative."
+                );
             }
 
             if (!IsAlive)

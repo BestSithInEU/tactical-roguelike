@@ -45,3 +45,21 @@ jobs:
         run: |
           test -f Packages/manifest.json
           test -f ProjectSettings/ProjectVersion.txt
+
+  csharp-format:
+    name: Check C# formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore .NET tools
+        run: dotnet tool restore
+
+      - name: Check CSharpier formatting
+        run: dotnet csharpier check .

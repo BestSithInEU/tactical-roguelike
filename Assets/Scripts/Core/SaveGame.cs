@@ -33,7 +33,7 @@ namespace TacticalRoguelike.Core
                 tiles = new int[state.Grid.Width * state.Grid.Height],
                 stairsDown = SavePosition.FromGridPosition(state.StairsDown),
                 player = SaveEntity.Capture(state.Player),
-                enemies = new SaveEntity[state.Enemies.Count]
+                enemies = new SaveEntity[state.Enemies.Count],
             };
 
             for (int y = 0; y < state.Grid.Height; y++)
@@ -79,7 +79,8 @@ namespace TacticalRoguelike.Core
                 player.Restore(),
                 restoredEnemies,
                 turnNumber,
-                (RunStatus)runStatus);
+                (RunStatus)runStatus
+            );
         }
 
         private void Validate()
@@ -94,7 +95,9 @@ namespace TacticalRoguelike.Core
             }
             if (tiles == null || tiles.Length != width * height)
             {
-                throw new InvalidOperationException("Save tile data does not match grid dimensions.");
+                throw new InvalidOperationException(
+                    "Save tile data does not match grid dimensions."
+                );
             }
             if (player == null)
             {
@@ -166,7 +169,7 @@ namespace TacticalRoguelike.Core
                     : null,
                 searchTurnsRemaining = entity.SearchTurnsRemaining,
                 isReturningHome = entity.IsReturningHome,
-                patrolStepIndex = entity.PatrolStepIndex
+                patrolStepIndex = entity.PatrolStepIndex,
             };
         }
 
@@ -184,11 +187,14 @@ namespace TacticalRoguelike.Core
                 hitPoints,
                 attackDamage,
                 isAlerted,
-                hasLastKnownPlayerPosition && lastKnownPlayerPosition != null ? lastKnownPlayerPosition.ToGridPosition() : (GridPosition?)null,
+                hasLastKnownPlayerPosition && lastKnownPlayerPosition != null
+                    ? lastKnownPlayerPosition.ToGridPosition()
+                    : (GridPosition?)null,
                 searchTurnsRemaining,
                 homePosition != null ? homePosition.ToGridPosition() : position.ToGridPosition(),
                 isReturningHome,
-                patrolStepIndex);
+                patrolStepIndex
+            );
         }
     }
 }

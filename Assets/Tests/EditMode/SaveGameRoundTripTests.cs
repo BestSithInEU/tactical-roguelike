@@ -9,7 +9,12 @@ namespace TacticalRoguelike.Tests.EditMode
         public void Restore_PreservesRunGridEntitiesAndStatus()
         {
             GameGrid grid = CreateGrid();
-            var state = CreateRunState(grid, new GridPosition(1, 1), new GridPosition(2, 1), new GridPosition(2, 1));
+            var state = CreateRunState(
+                grid,
+                new GridPosition(1, 1),
+                new GridPosition(2, 1),
+                new GridPosition(2, 1)
+            );
             TurnSystem.TryMovePlayer(state, 1, 0);
             TurnSystem.TryMovePlayer(state, 1, 0);
 
@@ -31,7 +36,12 @@ namespace TacticalRoguelike.Tests.EditMode
         public void Restore_PreservesEnemyAlertMemoryAndSearchState()
         {
             GameGrid grid = CreateGrid();
-            var state = CreateRunState(grid, new GridPosition(1, 1), new GridPosition(4, 1), new GridPosition(5, 3));
+            var state = CreateRunState(
+                grid,
+                new GridPosition(1, 1),
+                new GridPosition(4, 1),
+                new GridPosition(5, 3)
+            );
             state.Enemies[0].ObservePlayer(new GridPosition(2, 2), 2);
 
             RunState restored = SaveGame.Capture(state).Restore();
@@ -47,7 +57,12 @@ namespace TacticalRoguelike.Tests.EditMode
         public void Restore_PreservesEnemyHomeReturnAndPatrolState()
         {
             GameGrid grid = CreateGrid();
-            var state = CreateRunState(grid, new GridPosition(1, 1), new GridPosition(4, 1), new GridPosition(5, 3));
+            var state = CreateRunState(
+                grid,
+                new GridPosition(1, 1),
+                new GridPosition(4, 1),
+                new GridPosition(5, 3)
+            );
             EntityState enemy = state.Enemies[0];
             enemy.Position = new GridPosition(3, 2);
             enemy.BeginReturnHome();
@@ -66,7 +81,12 @@ namespace TacticalRoguelike.Tests.EditMode
         public void RestoredRun_CanContinueTakingTurns()
         {
             GameGrid grid = CreateGrid();
-            var state = CreateRunState(grid, new GridPosition(1, 1), new GridPosition(4, 1), new GridPosition(5, 3));
+            var state = CreateRunState(
+                grid,
+                new GridPosition(1, 1),
+                new GridPosition(4, 1),
+                new GridPosition(5, 3)
+            );
             TurnSystem.WaitPlayerTurn(state);
 
             RunState restored = SaveGame.Capture(state).Restore();
@@ -79,9 +99,16 @@ namespace TacticalRoguelike.Tests.EditMode
             Assert.AreEqual(new GridPosition(1, 2), restored.Player.Position);
         }
 
-        private static RunState CreateRunState(GameGrid grid, GridPosition playerSpawn, GridPosition enemySpawn, GridPosition stairsDown)
+        private static RunState CreateRunState(
+            GameGrid grid,
+            GridPosition playerSpawn,
+            GridPosition enemySpawn,
+            GridPosition stairsDown
+        )
         {
-            return new RunState(new DungeonLayout(grid, 777, playerSpawn, new[] { enemySpawn }, stairsDown));
+            return new RunState(
+                new DungeonLayout(grid, 777, playerSpawn, new[] { enemySpawn }, stairsDown)
+            );
         }
 
         private static GameGrid CreateGrid()
@@ -99,7 +126,11 @@ namespace TacticalRoguelike.Tests.EditMode
             Assert.AreEqual(expected.Height, actual.Height);
             foreach (GridPosition position in expected.Positions())
             {
-                Assert.AreEqual(expected.GetTile(position), actual.GetTile(position), "Tile mismatch at " + position);
+                Assert.AreEqual(
+                    expected.GetTile(position),
+                    actual.GetTile(position),
+                    "Tile mismatch at " + position
+                );
             }
         }
 
@@ -113,10 +144,16 @@ namespace TacticalRoguelike.Tests.EditMode
             Assert.AreEqual(expected.AttackDamage, actual.AttackDamage);
             Assert.AreEqual(expected.IsAlive, actual.IsAlive);
             Assert.AreEqual(expected.IsAlerted, actual.IsAlerted);
-            Assert.AreEqual(expected.LastKnownPlayerPosition.HasValue, actual.LastKnownPlayerPosition.HasValue);
+            Assert.AreEqual(
+                expected.LastKnownPlayerPosition.HasValue,
+                actual.LastKnownPlayerPosition.HasValue
+            );
             if (expected.LastKnownPlayerPosition.HasValue)
             {
-                Assert.AreEqual(expected.LastKnownPlayerPosition.Value, actual.LastKnownPlayerPosition.Value);
+                Assert.AreEqual(
+                    expected.LastKnownPlayerPosition.Value,
+                    actual.LastKnownPlayerPosition.Value
+                );
             }
             Assert.AreEqual(expected.SearchTurnsRemaining, actual.SearchTurnsRemaining);
             Assert.AreEqual(expected.IsReturningHome, actual.IsReturningHome);

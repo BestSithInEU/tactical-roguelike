@@ -4,7 +4,12 @@ namespace TacticalRoguelike.Core
 {
     public static class FieldOfView
     {
-        public static bool HasLineOfSight(GameGrid grid, GridPosition start, GridPosition target, int maxRange)
+        public static bool HasLineOfSight(
+            GameGrid grid,
+            GridPosition start,
+            GridPosition target,
+            int maxRange
+        )
         {
             if (grid == null)
             {
@@ -13,7 +18,11 @@ namespace TacticalRoguelike.Core
 
             if (maxRange < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(maxRange), maxRange, "Sight range cannot be negative.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(maxRange),
+                    maxRange,
+                    "Sight range cannot be negative."
+                );
             }
 
             if (!grid.IsInBounds(start) || !grid.IsInBounds(target))

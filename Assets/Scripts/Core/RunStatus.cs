@@ -4,6 +4,6 @@ namespace TacticalRoguelike.Core
     {
         Ongoing = 0,
         Lost = 1,
-        Won = 2
+        Won = 2,
     }
 }

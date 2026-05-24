@@ -4,6 +4,6 @@ namespace TacticalRoguelike.Core
     {
         Wall = 0,
         Floor = 1,
-        StairsDown = 2
+        StairsDown = 2,
     }
 }

@@ -5,7 +5,13 @@ namespace TacticalRoguelike.Core
 {
     public sealed class DungeonLayout
     {
-        public DungeonLayout(GameGrid grid, int seed, GridPosition playerSpawn, IEnumerable<GridPosition> enemySpawns, GridPosition stairsDown)
+        public DungeonLayout(
+            GameGrid grid,
+            int seed,
+            GridPosition playerSpawn,
+            IEnumerable<GridPosition> enemySpawns,
+            GridPosition stairsDown
+        )
         {
             Grid = grid ?? throw new ArgumentNullException(nameof(grid));
             Seed = seed;
@@ -14,12 +20,18 @@ namespace TacticalRoguelike.Core
 
             if (!Grid.IsWalkable(playerSpawn))
             {
-                throw new ArgumentException("Player spawn must be on a walkable tile.", nameof(playerSpawn));
+                throw new ArgumentException(
+                    "Player spawn must be on a walkable tile.",
+                    nameof(playerSpawn)
+                );
             }
 
             if (!Grid.IsWalkable(stairsDown))
             {
-                throw new ArgumentException("Stairs down must be on a walkable tile.", nameof(stairsDown));
+                throw new ArgumentException(
+                    "Stairs down must be on a walkable tile.",
+                    nameof(stairsDown)
+                );
             }
 
             if (enemySpawns == null)
@@ -32,7 +44,10 @@ namespace TacticalRoguelike.Core
             {
                 if (!Grid.IsWalkable(enemySpawn))
                 {
-                    throw new ArgumentException("Enemy spawns must be on walkable tiles.", nameof(enemySpawns));
+                    throw new ArgumentException(
+                        "Enemy spawns must be on walkable tiles.",
+                        nameof(enemySpawns)
+                    );
                 }
 
                 copiedEnemySpawns.Add(enemySpawn);
@@ -40,7 +55,10 @@ namespace TacticalRoguelike.Core
 
             if (copiedEnemySpawns.Count == 0)
             {
-                throw new ArgumentException("At least one enemy spawn is required.", nameof(enemySpawns));
+                throw new ArgumentException(
+                    "At least one enemy spawn is required.",
+                    nameof(enemySpawns)
+                );
             }
 
             EnemySpawns = copiedEnemySpawns.AsReadOnly();

@@ -101,19 +101,33 @@ namespace TacticalRoguelike.UnityAdapters
             bool acted = false;
             if (keyboard.wKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame)
             {
-                acted = TryPlayerAction(() => TurnSystem.TryMovePlayer(runState, 0, 1), "Moved north.");
+                acted = TryPlayerAction(
+                    () => TurnSystem.TryMovePlayer(runState, 0, 1),
+                    "Moved north."
+                );
             }
             else if (keyboard.sKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame)
             {
-                acted = TryPlayerAction(() => TurnSystem.TryMovePlayer(runState, 0, -1), "Moved south.");
+                acted = TryPlayerAction(
+                    () => TurnSystem.TryMovePlayer(runState, 0, -1),
+                    "Moved south."
+                );
             }
             else if (keyboard.aKey.wasPressedThisFrame || keyboard.leftArrowKey.wasPressedThisFrame)
             {
-                acted = TryPlayerAction(() => TurnSystem.TryMovePlayer(runState, -1, 0), "Moved west.");
+                acted = TryPlayerAction(
+                    () => TurnSystem.TryMovePlayer(runState, -1, 0),
+                    "Moved west."
+                );
             }
-            else if (keyboard.dKey.wasPressedThisFrame || keyboard.rightArrowKey.wasPressedThisFrame)
+            else if (
+                keyboard.dKey.wasPressedThisFrame || keyboard.rightArrowKey.wasPressedThisFrame
+            )
             {
-                acted = TryPlayerAction(() => TurnSystem.TryMovePlayer(runState, 1, 0), "Moved east.");
+                acted = TryPlayerAction(
+                    () => TurnSystem.TryMovePlayer(runState, 1, 0),
+                    "Moved east."
+                );
             }
             else if (keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)
             {
@@ -144,7 +158,8 @@ namespace TacticalRoguelike.UnityAdapters
                 aliveEnemies,
                 runState.Enemies.Count,
                 runState.Status,
-                status);
+                status
+            );
 
             GUI.Box(new Rect(10, 10, 760, 96), text);
         }
@@ -251,7 +266,12 @@ namespace TacticalRoguelike.UnityAdapters
             texture.name = spriteName + "Texture";
             generatedTextures.Add(texture);
 
-            Sprite sprite = Sprite.Create(texture, new Rect(0f, 0f, 16f, 16f), new Vector2(0.5f, 0.5f), 16f);
+            Sprite sprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, 16f, 16f),
+                new Vector2(0.5f, 0.5f),
+                16f
+            );
             sprite.name = spriteName;
             generatedSprites.Add(sprite);
             return sprite;
@@ -318,12 +338,22 @@ namespace TacticalRoguelike.UnityAdapters
 
             for (int i = 0; i < runState.Enemies.Count; i++)
             {
-                SpriteRenderer enemyRenderer = CreateEntityRenderer("Enemy " + i, enemySprite, 9, 0.66f);
+                SpriteRenderer enemyRenderer = CreateEntityRenderer(
+                    "Enemy " + i,
+                    enemySprite,
+                    9,
+                    0.66f
+                );
                 enemyRenderers.Add(enemyRenderer);
             }
         }
 
-        private SpriteRenderer CreateEntityRenderer(string objectName, Sprite sprite, int sortingOrder, float scale)
+        private SpriteRenderer CreateEntityRenderer(
+            string objectName,
+            Sprite sprite,
+            int sortingOrder,
+            float scale
+        )
         {
             var entity = new GameObject(objectName);
             entity.transform.SetParent(entityRoot.transform, false);
@@ -360,8 +390,16 @@ namespace TacticalRoguelike.UnityAdapters
             }
 
             camera.orthographic = true;
-            camera.transform.position = new Vector3((runState.Grid.Width - 1) * 0.5f, (runState.Grid.Height - 1) * 0.5f, -10f);
-            camera.orthographicSize = Mathf.Max(runState.Grid.Height * 0.55f, runState.Grid.Width * 0.32f, 6f);
+            camera.transform.position = new Vector3(
+                (runState.Grid.Width - 1) * 0.5f,
+                (runState.Grid.Height - 1) * 0.5f,
+                -10f
+            );
+            camera.orthographicSize = Mathf.Max(
+                runState.Grid.Height * 0.55f,
+                runState.Grid.Width * 0.32f,
+                6f
+            );
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = Color.black;
         }
@@ -385,6 +423,7 @@ namespace TacticalRoguelike.UnityAdapters
             return alive;
         }
 
-        private static string SavePath => Path.Combine(Application.persistentDataPath, "tactical-roguelike-save.json");
+        private static string SavePath =>
+            Path.Combine(Application.persistentDataPath, "tactical-roguelike-save.json");
     }
 }

@@ -77,7 +77,8 @@ namespace TacticalRoguelike.Tests.EditMode
             IReadOnlyList<GridPosition> path = pathfinding.FindPath(
                 grid,
                 new GridPosition(0, 2),
-                new GridPosition(4, 2));
+                new GridPosition(4, 2)
+            );
 
             Assert.AreEqual(0, path.Count);
         }
@@ -91,8 +92,14 @@ namespace TacticalRoguelike.Tests.EditMode
             var wall = new GridPosition(0, 0);
             grid.SetTile(wall, GridTileKind.Wall);
 
-            Assert.AreEqual(0, pathfinding.FindPath(grid, new GridPosition(-1, 0), validFloor).Count);
-            Assert.AreEqual(0, pathfinding.FindPath(grid, validFloor, new GridPosition(3, 0)).Count);
+            Assert.AreEqual(
+                0,
+                pathfinding.FindPath(grid, new GridPosition(-1, 0), validFloor).Count
+            );
+            Assert.AreEqual(
+                0,
+                pathfinding.FindPath(grid, validFloor, new GridPosition(3, 0)).Count
+            );
             Assert.AreEqual(0, pathfinding.FindPath(grid, wall, validFloor).Count);
             Assert.AreEqual(0, pathfinding.FindPath(grid, validFloor, wall).Count);
         }
@@ -102,7 +109,9 @@ namespace TacticalRoguelike.Tests.EditMode
         {
             var pathfinding = new Pathfinding();
 
-            Assert.Throws<ArgumentNullException>(() => pathfinding.FindPath(null, new GridPosition(0, 0), new GridPosition(1, 1)));
+            Assert.Throws<ArgumentNullException>(() =>
+                pathfinding.FindPath(null, new GridPosition(0, 0), new GridPosition(1, 1))
+            );
         }
 
         [Test]
@@ -127,13 +136,20 @@ namespace TacticalRoguelike.Tests.EditMode
             return Math.Abs(first.X - second.X) + Math.Abs(first.Y - second.Y);
         }
 
-        private static void AssertPathIsCardinalAndWalkable(GameGrid grid, IReadOnlyList<GridPosition> path)
+        private static void AssertPathIsCardinalAndWalkable(
+            GameGrid grid,
+            IReadOnlyList<GridPosition> path
+        )
         {
             Assert.IsTrue(path.All(grid.IsWalkable));
 
             for (int i = 1; i < path.Count; i++)
             {
-                Assert.AreEqual(1, ManhattanDistance(path[i - 1], path[i]), $"Invalid step from {path[i - 1]} to {path[i]}.");
+                Assert.AreEqual(
+                    1,
+                    ManhattanDistance(path[i - 1], path[i]),
+                    $"Invalid step from {path[i - 1]} to {path[i]}."
+                );
             }
         }
     }

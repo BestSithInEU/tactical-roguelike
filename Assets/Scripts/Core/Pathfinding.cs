@@ -5,7 +5,11 @@ namespace TacticalRoguelike.Core
 {
     public sealed class Pathfinding
     {
-        public IReadOnlyList<GridPosition> FindPath(GameGrid grid, GridPosition start, GridPosition goal)
+        public IReadOnlyList<GridPosition> FindPath(
+            GameGrid grid,
+            GridPosition start,
+            GridPosition goal
+        )
         {
             if (grid == null)
             {
@@ -55,14 +59,24 @@ namespace TacticalRoguelike.Core
                     }
 
                     int tentativeCost = current.CostFromStart + 1;
-                    if (bestCosts.TryGetValue(neighbor, out int knownCost) && tentativeCost >= knownCost)
+                    if (
+                        bestCosts.TryGetValue(neighbor, out int knownCost)
+                        && tentativeCost >= knownCost
+                    )
                     {
                         continue;
                     }
 
                     cameFrom[neighbor] = current.Position;
                     bestCosts[neighbor] = tentativeCost;
-                    openSet.Add(new PathNode(neighbor, tentativeCost, ManhattanDistance(neighbor, goal), nextOrder++));
+                    openSet.Add(
+                        new PathNode(
+                            neighbor,
+                            tentativeCost,
+                            ManhattanDistance(neighbor, goal),
+                            nextOrder++
+                        )
+                    );
                 }
             }
 
@@ -77,11 +91,18 @@ namespace TacticalRoguelike.Core
             for (int i = 1; i < openSet.Count; i++)
             {
                 PathNode candidate = openSet[i];
-                if (candidate.EstimatedTotalCost < best.EstimatedTotalCost
-                    || (candidate.EstimatedTotalCost == best.EstimatedTotalCost && candidate.EstimatedRemainingCost < best.EstimatedRemainingCost)
-                    || (candidate.EstimatedTotalCost == best.EstimatedTotalCost
+                if (
+                    candidate.EstimatedTotalCost < best.EstimatedTotalCost
+                    || (
+                        candidate.EstimatedTotalCost == best.EstimatedTotalCost
+                        && candidate.EstimatedRemainingCost < best.EstimatedRemainingCost
+                    )
+                    || (
+                        candidate.EstimatedTotalCost == best.EstimatedTotalCost
                         && candidate.EstimatedRemainingCost == best.EstimatedRemainingCost
-                        && candidate.Order < best.Order))
+                        && candidate.Order < best.Order
+                    )
+                )
                 {
                     bestIndex = i;
                     best = candidate;
@@ -94,7 +115,8 @@ namespace TacticalRoguelike.Core
         private static IReadOnlyList<GridPosition> ReconstructPath(
             IReadOnlyDictionary<GridPosition, GridPosition> cameFrom,
             GridPosition start,
-            GridPosition goal)
+            GridPosition goal
+        )
         {
             var path = new List<GridPosition> { goal };
             GridPosition current = goal;
@@ -116,7 +138,12 @@ namespace TacticalRoguelike.Core
 
         private readonly struct PathNode
         {
-            public PathNode(GridPosition position, int costFromStart, int estimatedRemainingCost, int order)
+            public PathNode(
+                GridPosition position,
+                int costFromStart,
+                int estimatedRemainingCost,
+                int order
+            )
             {
                 Position = position;
                 CostFromStart = costFromStart;

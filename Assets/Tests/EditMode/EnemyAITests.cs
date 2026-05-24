@@ -252,9 +252,19 @@ namespace TacticalRoguelike.Tests.EditMode
             Assert.AreEqual(new GridPosition(2, 2), enemy.Position);
         }
 
-        private static RunState CreateRunState(GameGrid grid, GridPosition playerSpawn, GridPosition enemySpawn)
+        private static RunState CreateRunState(
+            GameGrid grid,
+            GridPosition playerSpawn,
+            GridPosition enemySpawn
+        )
         {
-            var layout = new DungeonLayout(grid, 1234, playerSpawn, new[] { enemySpawn }, new GridPosition(6, 4));
+            var layout = new DungeonLayout(
+                grid,
+                1234,
+                playerSpawn,
+                new[] { enemySpawn },
+                new GridPosition(6, 4)
+            );
             return new RunState(layout);
         }
 
