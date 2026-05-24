@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using TacticalRoguelike.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -10,10 +11,16 @@ namespace TacticalRoguelike.UnityAdapters
     {
         private const int DefaultSeed = 12345;
         private const float TileSize = 1f;
+        private const float HudMargin = 12f;
+        private const float HudLineHeight = 18f;
+        private const float HudPadding = 20f;
+        private const float MinimumWorldViewportHeight = 0.62f;
 
         private static PlaceholderRoguelikeController activeController;
 
+        private readonly Pathfinding debugPathfinding = new Pathfinding();
         private readonly List<SpriteRenderer> enemyRenderers = new List<SpriteRenderer>();
+        private readonly List<SpriteRenderer> debugRenderers = new List<SpriteRenderer>();
         private readonly List<Texture2D> generatedTextures = new List<Texture2D>();
         private readonly List<Sprite> generatedSprites = new List<Sprite>();
 
@@ -21,26 +28,19 @@ namespace TacticalRoguelike.UnityAdapters
         private RunState runState;
         private GameObject tileRoot;
         private GameObject entityRoot;
+        private GameObject debugRoot;
         private Sprite floorSprite;
         private Sprite wallSprite;
         private Sprite stairsSprite;
         private Sprite playerSprite;
         private Sprite enemySprite;
+        private Sprite debugPathSprite;
+        private Sprite debugLastKnownSprite;
+        private Sprite debugHomeSprite;
         private SpriteRenderer playerRenderer;
         private int currentSeed = DefaultSeed;
+        private bool debugOverlayEnabled = true;
         private string status = "Ready.";
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void BootstrapAfterSceneLoad()
-        {
-            if (FindAnyObjectByType<PlaceholderRoguelikeController>() != null)
-            {
-                return;
-            }
-
-            var controllerObject = new GameObject(nameof(PlaceholderRoguelikeController));
-            controllerObject.AddComponent<PlaceholderRoguelikeController>();
-        }
 
         private void Awake()
         {
@@ -90,6 +90,15 @@ namespace TacticalRoguelike.UnityAdapters
             if (keyboard.f9Key.wasPressedThisFrame)
             {
                 LoadRun();
+                return;
+            }
+
+            if (keyboard.f1Key.wasPressedThisFrame)
+            {
+                debugOverlayEnabled = !debugOverlayEnabled;
+                ConfigureCamera();
+                RefreshDebugOverlay();
+                status = debugOverlayEnabled ? "Debug overlay enabled." : "Debug overlay disabled.";
                 return;
             }
 
@@ -144,24 +153,43 @@ namespace TacticalRoguelike.UnityAdapters
         {
             if (runState == null)
             {
-                GUI.Label(new Rect(10, 10, 600, 24), "Roguelike placeholder is starting...");
+                GUI.Label(
+                    new Rect(HudMargin, HudMargin, 600, 24),
+                    "Roguelike placeholder is starting..."
+                );
                 return;
             }
 
+            ConfigureCamera();
+
             int aliveEnemies = CountAliveEnemies();
             string text = string.Format(
-                "Seed: {0} | Config: default DungeonGeneratorConfig | Turn: {1}\nPlayer HP: {2}/{3} | Enemies: {4}/{5} alive | Status: {6}\n{7}\nControls: WASD/Arrows move, Space/Enter wait, R restart, N new, F5 save, F9 load",
+                "Seed: {0} | Floor: {1} | Config: default DungeonGeneratorConfig | Turn: {2}\nPlayer HP: {3}/{4} | Enemies: {5}/{6} alive | Status: {7} | Debug: {8}\n{9}\nControls: WASD/Arrows move, Space/Enter wait, R restart, N new, F5 save, F9 load, F1 debug",
                 currentSeed,
+                runState.FloorNumber,
                 runState.TurnNumber,
                 runState.Player.HitPoints,
                 runState.Player.MaxHitPoints,
                 aliveEnemies,
                 runState.Enemies.Count,
                 runState.Status,
+                debugOverlayEnabled ? "on" : "off",
                 status
             );
 
-            GUI.Box(new Rect(10, 10, 760, 96), text);
+            if (debugOverlayEnabled)
+            {
+                text += "\n\n" + BuildDebugText();
+            }
+
+            var boxStyle = new GUIStyle(GUI.skin.box)
+            {
+                alignment = TextAnchor.UpperLeft,
+                wordWrap = true,
+                padding = new RectOffset(12, 12, 10, 10),
+            };
+
+            GUI.Box(GetHudRect(), text, boxStyle);
         }
 
         private void OnDestroy()
@@ -247,6 +275,18 @@ namespace TacticalRoguelike.UnityAdapters
             stairsSprite = CreateSolidSprite(new Color(0.95f, 0.75f, 0.25f, 1f), "StairsSprite");
             playerSprite = CreateSolidSprite(new Color(0.2f, 0.65f, 1f, 1f), "PlayerSprite");
             enemySprite = CreateSolidSprite(new Color(1f, 0.22f, 0.18f, 1f), "EnemySprite");
+            debugPathSprite = CreateSolidSprite(
+                new Color(0.2f, 1f, 0.45f, 0.45f),
+                "DebugPathSprite"
+            );
+            debugLastKnownSprite = CreateSolidSprite(
+                new Color(1f, 0.95f, 0.1f, 0.7f),
+                "DebugLastKnownSprite"
+            );
+            debugHomeSprite = CreateSolidSprite(
+                new Color(0.65f, 0.35f, 1f, 0.45f),
+                "DebugHomeSprite"
+            );
         }
 
         private Sprite CreateSolidSprite(Color color, string spriteName)
@@ -289,7 +329,13 @@ namespace TacticalRoguelike.UnityAdapters
                 Destroy(entityRoot);
             }
 
+            if (debugRoot != null)
+            {
+                Destroy(debugRoot);
+            }
+
             enemyRenderers.Clear();
+            debugRenderers.Clear();
             playerRenderer = null;
         }
 
@@ -377,6 +423,178 @@ namespace TacticalRoguelike.UnityAdapters
                 renderer.transform.position = ToWorld(enemy.Position, -0.1f);
                 renderer.gameObject.SetActive(enemy.IsAlive);
             }
+
+            RefreshDebugOverlay();
+        }
+
+        private void RefreshDebugOverlay()
+        {
+            if (debugRoot != null)
+            {
+                Destroy(debugRoot);
+            }
+
+            debugRenderers.Clear();
+
+            if (!debugOverlayEnabled || runState == null)
+            {
+                return;
+            }
+
+            debugRoot = new GameObject("Debug Overlay");
+            debugRoot.transform.SetParent(transform, false);
+
+            for (int i = 0; i < runState.Enemies.Count; i++)
+            {
+                EntityState enemy = runState.Enemies[i];
+                if (!enemy.IsAlive)
+                {
+                    continue;
+                }
+
+                CreateDebugMarker(
+                    "Enemy " + i + " Home",
+                    enemy.HomePosition,
+                    debugHomeSprite,
+                    2,
+                    0.45f
+                );
+
+                GridPosition? target = GetDebugPathTarget(enemy);
+                if (target.HasValue)
+                {
+                    IReadOnlyList<GridPosition> path = debugPathfinding.FindPath(
+                        runState.Grid,
+                        enemy.Position,
+                        target.Value
+                    );
+                    for (int step = 1; step < path.Count; step++)
+                    {
+                        CreateDebugMarker(
+                            "Enemy " + i + " Path " + step,
+                            path[step],
+                            debugPathSprite,
+                            3,
+                            0.34f
+                        );
+                    }
+                }
+
+                if (enemy.LastKnownPlayerPosition.HasValue)
+                {
+                    CreateDebugMarker(
+                        "Enemy " + i + " Last Known Player",
+                        enemy.LastKnownPlayerPosition.Value,
+                        debugLastKnownSprite,
+                        4,
+                        0.55f
+                    );
+                }
+            }
+        }
+
+        private void CreateDebugMarker(
+            string objectName,
+            GridPosition position,
+            Sprite sprite,
+            int sortingOrder,
+            float scale
+        )
+        {
+            var marker = new GameObject(objectName);
+            marker.transform.SetParent(debugRoot.transform, false);
+            marker.transform.position = ToWorld(position, -0.05f);
+            marker.transform.localScale = new Vector3(scale, scale, 1f);
+
+            SpriteRenderer renderer = marker.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.sortingOrder = sortingOrder;
+            debugRenderers.Add(renderer);
+        }
+
+        private string BuildDebugText()
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine(
+                "Debug overlay: green=enemy path, yellow=last known player, purple=home."
+            );
+
+            for (int i = 0; i < runState.Enemies.Count; i++)
+            {
+                EntityState enemy = runState.Enemies[i];
+                GridPosition? target = GetDebugPathTarget(enemy);
+                IReadOnlyList<GridPosition> path =
+                    enemy.IsAlive && target.HasValue
+                        ? debugPathfinding.FindPath(runState.Grid, enemy.Position, target.Value)
+                        : new List<GridPosition>();
+
+                builder.Append("Enemy ");
+                builder.Append(i);
+                builder.Append(": ");
+                builder.Append(GetEnemyDebugState(enemy));
+                builder.Append(" pos=");
+                builder.Append(enemy.Position);
+                builder.Append(" hp=");
+                builder.Append(enemy.HitPoints);
+                builder.Append('/');
+                builder.Append(enemy.MaxHitPoints);
+                builder.Append(" lkp=");
+                builder.Append(
+                    enemy.LastKnownPlayerPosition.HasValue
+                        ? enemy.LastKnownPlayerPosition.Value.ToString()
+                        : "none"
+                );
+                builder.Append(" pathSteps=");
+                builder.Append(path.Count > 0 ? path.Count - 1 : 0);
+                builder.AppendLine();
+            }
+
+            return builder.ToString();
+        }
+
+        private GridPosition? GetDebugPathTarget(EntityState enemy)
+        {
+            if (!enemy.IsAlive)
+            {
+                return null;
+            }
+
+            if (enemy.IsReturningHome)
+            {
+                return enemy.HomePosition;
+            }
+
+            if (enemy.LastKnownPlayerPosition.HasValue)
+            {
+                return enemy.LastKnownPlayerPosition.Value;
+            }
+
+            return enemy.IsAlerted ? runState.Player.Position : (GridPosition?)null;
+        }
+
+        private static string GetEnemyDebugState(EntityState enemy)
+        {
+            if (!enemy.IsAlive)
+            {
+                return "Dead";
+            }
+
+            if (enemy.IsReturningHome)
+            {
+                return "Returning home";
+            }
+
+            if (enemy.LastKnownPlayerPosition.HasValue && enemy.SearchTurnsRemaining > 0)
+            {
+                return "Searching";
+            }
+
+            if (enemy.IsAlerted)
+            {
+                return "Chasing";
+            }
+
+            return "Patrolling";
         }
 
         private void ConfigureCamera()
@@ -390,18 +608,57 @@ namespace TacticalRoguelike.UnityAdapters
             }
 
             camera.orthographic = true;
+            Rect viewport = GetWorldViewportRect();
+            camera.rect = viewport;
             camera.transform.position = new Vector3(
                 (runState.Grid.Width - 1) * 0.5f,
                 (runState.Grid.Height - 1) * 0.5f,
                 -10f
             );
+            float viewportAspect = CalculateViewportAspect(viewport);
             camera.orthographicSize = Mathf.Max(
                 runState.Grid.Height * 0.55f,
-                runState.Grid.Width * 0.32f,
+                (runState.Grid.Width * 0.5f / viewportAspect) * 1.08f,
                 6f
             );
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = Color.black;
+        }
+
+        private Rect GetHudRect()
+        {
+            return new Rect(
+                HudMargin,
+                HudMargin,
+                Mathf.Max(320f, Screen.width - HudMargin * 2f),
+                GetHudHeight()
+            );
+        }
+
+        private float GetHudHeight()
+        {
+            int lineCount = 4;
+            if (debugOverlayEnabled && runState != null)
+            {
+                lineCount += 2 + runState.Enemies.Count;
+            }
+
+            return Mathf.Min(Screen.height * 0.34f, HudPadding + lineCount * HudLineHeight);
+        }
+
+        private Rect GetWorldViewportRect()
+        {
+            float screenHeight = Mathf.Max(1f, Screen.height);
+            float reservedTop = (GetHudHeight() + HudMargin * 2f) / screenHeight;
+            float viewportHeight = Mathf.Clamp(1f - reservedTop, MinimumWorldViewportHeight, 1f);
+            return new Rect(0f, 0f, 1f, viewportHeight);
+        }
+
+        private static float CalculateViewportAspect(Rect viewport)
+        {
+            float viewportPixelWidth = Mathf.Max(1f, Screen.width * viewport.width);
+            float viewportPixelHeight = Mathf.Max(1f, Screen.height * viewport.height);
+            return viewportPixelWidth / viewportPixelHeight;
         }
 
         private Vector3 ToWorld(GridPosition position, float z)
