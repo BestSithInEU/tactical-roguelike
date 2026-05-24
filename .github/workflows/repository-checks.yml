@@ -1,0 +1,47 @@
+name: Repository checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-config:
+    name: Validate repository configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          import sys
+
+          failed = False
+          ignored_parts = {'Library', 'Temp', 'Obj', 'Build', 'Builds', 'Logs', 'UserSettings'}
+
+          for path in sorted(Path('.').rglob('*.json')):
+              if any(part in ignored_parts for part in path.parts):
+                  continue
+              try:
+                  json.loads(path.read_text(encoding='utf-8-sig'))
+              except Exception as exc:
+                  failed = True
+                  print(f'{path}: {exc}', file=sys.stderr)
+
+          if failed:
+              sys.exit(1)
+          PY
+
+      - name: Check Unity project files exist
+        shell: bash
+        run: |
+          test -f Packages/manifest.json
+          test -f ProjectSettings/ProjectVersion.txt
