@@ -60,7 +60,7 @@ namespace TacticalRoguelike.Tests.EditMode
         public void Act_AtHomeAfterReturning_ResumesPatrol()
         {
             GameGrid grid = CreateFloorGrid();
-            grid.SetTile(new GridPosition(1, 1), GridTileKind.Wall);
+            grid.SetTile(new GridPosition(4, 2), GridTileKind.Wall);
             RunState state = CreateRunState(grid, new GridPosition(0, 0), new GridPosition(5, 2));
             EntityState enemy = state.Enemies[0];
             enemy.BeginReturnHome();
@@ -144,7 +144,15 @@ namespace TacticalRoguelike.Tests.EditMode
 
             new EnemyAI().Act(state, enemy);
 
-            Assert.AreEqual(new GridPosition(4, 3), enemy.Position);
+            GridPosition start = new GridPosition(5, 3);
+            GridPosition playerPosition = new GridPosition(1, 1);
+            Assert.AreEqual(
+                ManhattanDistance(start, playerPosition) - 1,
+                ManhattanDistance(enemy.Position, playerPosition)
+            );
+            Assert.AreEqual(1, ManhattanDistance(start, enemy.Position));
+            Assert.AreNotEqual(playerPosition, enemy.Position);
+            Assert.IsTrue(grid.IsWalkable(enemy.Position));
             Assert.IsTrue(enemy.IsAlerted);
             Assert.AreEqual(new GridPosition(1, 1), enemy.LastKnownPlayerPosition.Value);
         }
@@ -159,6 +167,7 @@ namespace TacticalRoguelike.Tests.EditMode
             enemyAI.Act(state, enemy);
 
             grid.SetTile(new GridPosition(3, 2), GridTileKind.Wall);
+            grid.SetTile(new GridPosition(2, 2), GridTileKind.Wall);
             state.Player.Position = new GridPosition(1, 1);
 
             enemyAI.Act(state, enemy);
@@ -189,14 +198,24 @@ namespace TacticalRoguelike.Tests.EditMode
 
             enemyAI.Act(state, enemy);
             Assert.IsTrue(enemy.IsAlerted);
+            Assert.AreEqual(EnemyAI.DefaultSearchTurns, enemy.SearchTurnsRemaining);
+            Assert.AreEqual(new GridPosition(5, 1), enemy.Position);
+
+            enemyAI.Act(state, enemy);
+            Assert.IsTrue(enemy.IsAlerted);
+            Assert.AreEqual(EnemyAI.DefaultSearchTurns, enemy.SearchTurnsRemaining);
+            Assert.AreEqual(new GridPosition(4, 1), enemy.Position);
+
+            enemyAI.Act(state, enemy);
+            Assert.IsTrue(enemy.IsAlerted);
             Assert.AreEqual(1, enemy.SearchTurnsRemaining);
-            Assert.AreEqual(new GridPosition(5, 2), enemy.Position);
+            Assert.AreEqual(new GridPosition(4, 1), enemy.Position);
 
             enemyAI.Act(state, enemy);
             Assert.IsFalse(enemy.IsAlerted);
             Assert.IsFalse(enemy.LastKnownPlayerPosition.HasValue);
             Assert.IsTrue(enemy.IsReturningHome);
-            Assert.AreEqual(new GridPosition(5, 2), enemy.Position);
+            Assert.AreEqual(new GridPosition(4, 1), enemy.Position);
         }
 
         [Test]
@@ -271,6 +290,11 @@ namespace TacticalRoguelike.Tests.EditMode
         private static GameGrid CreateFloorGrid()
         {
             return new GameGrid(8, 5, GridTileKind.Floor);
+        }
+
+        private static int ManhattanDistance(GridPosition first, GridPosition second)
+        {
+            return System.Math.Abs(first.X - second.X) + System.Math.Abs(first.Y - second.Y);
         }
     }
 }
